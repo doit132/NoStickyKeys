@@ -1,4 +1,4 @@
-#include "keyboard_monitor.h"
+#include "virtual_keyboard_monitor.h"
 #include "physical_keyboard_monitor.h"
 #include <thread>
 #include <windows.h>
@@ -6,7 +6,7 @@
 #include <iomanip>
 
 int main() {
-    KeyboardMonitor virtualMonitor;
+    VirtualKeyboardMonitor virtualMonitor;
     PhysicalKeyboardMonitor physicalMonitor;
     
     if (!virtualMonitor.Start() || !physicalMonitor.Start()) {

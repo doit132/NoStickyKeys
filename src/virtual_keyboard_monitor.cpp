@@ -1,19 +1,19 @@
-#include "keyboard_monitor.h"
+#include "virtual_keyboard_monitor.h"
 #include <iostream>
 #include <iomanip>
 
-KeyboardMonitor* KeyboardMonitor::instance = nullptr;
+VirtualKeyboardMonitor* VirtualKeyboardMonitor::instance = nullptr;
 
-KeyboardMonitor::KeyboardMonitor() : keyboardHook(NULL), isRunning(false) {
+VirtualKeyboardMonitor::VirtualKeyboardMonitor() : keyboardHook(NULL), isRunning(false) {
     instance = this;
 }
 
-KeyboardMonitor::~KeyboardMonitor() {
+VirtualKeyboardMonitor::~VirtualKeyboardMonitor() {
     Stop();
     instance = nullptr;
 }
 
-bool KeyboardMonitor::Start() {
+bool VirtualKeyboardMonitor::Start() {
     keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
     if (!keyboardHook) {
         std::cout << "Failed to install keyboard hook!" << std::endl;
@@ -21,12 +21,12 @@ bool KeyboardMonitor::Start() {
     }
 
     isRunning = true;
-    std::cout << "Keyboard hook installed. Press Ctrl+C to exit." << std::endl;
+    std::cout << "Virtual keyboard hook installed. Press Ctrl+C to exit." << std::endl;
     PrintKeyStates();
     return true;
 }
 
-void KeyboardMonitor::Stop() {
+void VirtualKeyboardMonitor::Stop() {
     if (keyboardHook) {
         UnhookWindowsHookEx(keyboardHook);
         keyboardHook = NULL;
@@ -34,7 +34,7 @@ void KeyboardMonitor::Stop() {
     isRunning = false;
 }
 
-void KeyboardMonitor::RunMessageLoop() {
+void VirtualKeyboardMonitor::RunMessageLoop() {
     MSG msg;
     while (isRunning && GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
@@ -42,7 +42,7 @@ void KeyboardMonitor::RunMessageLoop() {
     }
 }
 
-LRESULT CALLBACK KeyboardMonitor::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK VirtualKeyboardMonitor::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0 && instance) {
         KBDLLHOOKSTRUCT* kbStruct = (KBDLLHOOKSTRUCT*)lParam;
         
@@ -52,7 +52,7 @@ LRESULT CALLBACK KeyboardMonitor::KeyboardProc(int nCode, WPARAM wParam, LPARAM 
             bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
             instance->UpdateKeyState(kbStruct->vkCode, isKeyDown);
             
-            std::cout << "Key: vkCode=0x" << std::hex << std::setw(2) << std::setfill('0') 
+            std::cout << "Virtual Key: vkCode=0x" << std::hex << std::setw(2) << std::setfill('0') 
                       << kbStruct->vkCode << " scanCode=0x" << std::hex << kbStruct->scanCode 
                       << " flags=0x" << std::hex << kbStruct->flags;
 
@@ -60,7 +60,7 @@ LRESULT CALLBACK KeyboardMonitor::KeyboardProc(int nCode, WPARAM wParam, LPARAM 
                 kbStruct->vkCode == VK_LCONTROL || kbStruct->vkCode == VK_RCONTROL ||
                 kbStruct->vkCode == VK_LMENU || kbStruct->vkCode == VK_RMENU) {
                 
-                std::cout << " Special key: ";
+                std::cout << " Special virtual key: ";
                 switch (kbStruct->vkCode) {
                     case VK_LSHIFT: std::cout << "Left Shift"; break;
                     case VK_RSHIFT: std::cout << "Right Shift"; break;
@@ -70,16 +70,15 @@ LRESULT CALLBACK KeyboardMonitor::KeyboardProc(int nCode, WPARAM wParam, LPARAM 
                     case VK_RMENU: std::cout << "Right Alt"; break;
                 }
                 std::cout << (isKeyDown ? " pressed" : " released");
+                instance->PrintKeyStates();
             }
-            
-            instance->PrintKeyStates();
         }
     }
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-void KeyboardMonitor::PrintKeyStates() const {
-    std::cout << " [States: ";
+void VirtualKeyboardMonitor::PrintKeyStates() const {
+    std::cout << " [Virtual States: ";
     std::cout << "LCtrl:" << (virtualKeyStates.leftCtrl ? "1" : "0") << " ";
     std::cout << "RCtrl:" << (virtualKeyStates.rightCtrl ? "1" : "0") << " ";
     std::cout << "LShift:" << (virtualKeyStates.leftShift ? "1" : "0") << " ";
@@ -89,7 +88,7 @@ void KeyboardMonitor::PrintKeyStates() const {
     std::cout << "]" << std::endl;
 }
 
-void KeyboardMonitor::UpdateKeyState(DWORD vkCode, bool isKeyDown) {
+void VirtualKeyboardMonitor::UpdateKeyState(DWORD vkCode, bool isKeyDown) {
     switch (vkCode) {
         case VK_LSHIFT: virtualKeyStates.leftShift = isKeyDown; break;
         case VK_RSHIFT: virtualKeyStates.rightShift = isKeyDown; break;

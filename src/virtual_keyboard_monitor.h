@@ -1,10 +1,10 @@
 #pragma once
 #include <windows.h>
 
-class KeyboardMonitor {
+class VirtualKeyboardMonitor {
 public:
-    KeyboardMonitor();
-    ~KeyboardMonitor();
+    VirtualKeyboardMonitor();
+    ~VirtualKeyboardMonitor();
 
     bool Start();
     void Stop();
@@ -26,7 +26,7 @@ private:
     void PrintKeyStates() const;
     void UpdateKeyState(DWORD vkCode, bool isKeyDown);
 
-    static KeyboardMonitor* instance;
+    static VirtualKeyboardMonitor* instance;
     HHOOK keyboardHook;
     VirtualKeyStates virtualKeyStates;
     bool isRunning;
