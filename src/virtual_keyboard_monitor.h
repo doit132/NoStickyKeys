@@ -3,6 +3,8 @@
 #include <functional>
 #include <unordered_map>
 #include <chrono>
+#include "keyboard_common.h"
+#include "keyboard_logger.h"
 
 class VirtualKeyboardMonitor {
 public:
@@ -12,17 +14,6 @@ public:
     bool Start();
     void Stop();
     void RunMessageLoop();
-
-    struct VirtualKeyStates {
-        bool leftCtrl = false;
-        bool rightCtrl = false;
-        bool leftShift = false;
-        bool rightShift = false;
-        bool leftAlt = false;
-        bool rightAlt = false;
-    };
-
-    const VirtualKeyStates& GetKeyStates() const { return virtualKeyStates; }
     
     // 添加强制释放按键的方法
     void ForceReleaseKey(DWORD vkCode);
@@ -33,17 +24,18 @@ public:
         keyStateChecker = checker;
     }
 
+    const keyboard::KeyStates& GetKeyStates() const { return virtualKeyStates; }
+
     static const int KEY_CHECK_DELAY_MS = 50;  // 延迟检测时间
 
 private:
     static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
-    void PrintKeyStates() const;
     void UpdateKeyState(DWORD vkCode, bool isKeyDown);
     void CheckDelayedKeys();  // 检查延迟的按键
 
     static VirtualKeyboardMonitor* instance;
     HHOOK keyboardHook;
-    VirtualKeyStates virtualKeyStates;
+    keyboard::KeyStates virtualKeyStates;
     bool isRunning;
     KeyStateCheckCallback keyStateChecker;
     

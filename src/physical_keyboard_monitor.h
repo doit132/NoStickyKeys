@@ -1,6 +1,8 @@
 #pragma once
 #include <windows.h>
 #include "interception.h"
+#include "keyboard_common.h"
+#include "keyboard_logger.h"
 
 // 键盘扫描码定义
 #define SCANCODE_LSHIFT    0x2A
@@ -18,33 +20,17 @@ public:
     bool Start();
     void Stop();
     void RunLoop();
-
-    struct PhysicalKeyStates {
-        bool leftCtrl = false;
-        bool rightCtrl = false;
-        bool leftShift = false;
-        bool rightShift = false;
-        bool leftAlt = false;
-        bool rightAlt = false;
-    };
-
-    const PhysicalKeyStates& GetKeyStates() const { return physicalKeyStates; }
     
     // 检查物理按键是否处于按下状态
     bool IsKeyDown(DWORD vkCode) const;
-    
-    // 扫描码转换为虚拟键码
-    static DWORD ScanCodeToVK(DWORD scanCode);
-    
-    // 虚拟键码转换为扫描码
-    static DWORD VKToScanCode(DWORD vkCode);
+
+    const keyboard::KeyStates& GetKeyStates() const { return physicalKeyStates; }
 
 private:
-    void PrintKeyStates() const;
     void UpdateKeyState(InterceptionKeyStroke& stroke);
 
     InterceptionContext context;
     InterceptionDevice device;
-    PhysicalKeyStates physicalKeyStates;
     bool isRunning;
+    keyboard::KeyStates physicalKeyStates;
 };

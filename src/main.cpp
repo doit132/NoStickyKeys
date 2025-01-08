@@ -1,11 +1,26 @@
 #include "virtual_keyboard_monitor.h"
 #include "physical_keyboard_monitor.h"
+#include "keyboard_logger.h"
 #include <thread>
 #include <windows.h>
 #include <iostream>
-#include <iomanip>
+#include <csignal>
+
+using namespace keyboard;
+
+// 全局变量用于处理 Ctrl+C
+bool g_running = true;
+
+void SignalHandler(int signal) {
+    if (signal == SIGINT) {
+        g_running = false;
+    }
+}
 
 int main() {
+    // 设置 Ctrl+C 处理器
+    signal(SIGINT, SignalHandler);
+    
     VirtualKeyboardMonitor virtualMonitor;
     PhysicalKeyboardMonitor physicalMonitor;
     
@@ -15,6 +30,7 @@ int main() {
     });
     
     if (!virtualMonitor.Start() || !physicalMonitor.Start()) {
+        Logger::LogError("Failed to start keyboard monitors!");
         return 1;
     }
 

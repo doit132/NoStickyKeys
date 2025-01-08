@@ -5,6 +5,8 @@
 #include <vector>
 #include <unordered_map>
 
+using namespace keyboard;
+
 const int KEY_CHECK_DELAY_MS = 1000; // 延时检测时间（毫秒）
 
 VirtualKeyboardMonitor* VirtualKeyboardMonitor::instance = nullptr;
@@ -21,7 +23,7 @@ VirtualKeyboardMonitor::~VirtualKeyboardMonitor() {
 bool VirtualKeyboardMonitor::Start() {
     keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
     if (!keyboardHook) {
-        std::cout << "Failed to install keyboard hook!" << std::endl;
+        Logger::LogError("Failed to install keyboard hook!");
         return false;
     }
 
@@ -33,8 +35,8 @@ bool VirtualKeyboardMonitor::Start() {
     });
 
     isRunning = true;
-    std::cout << "Virtual keyboard hook installed. Press Ctrl+C to exit." << std::endl;
-    PrintKeyStates();
+    Logger::LogMessage("Virtual keyboard hook installed. Press Ctrl+C to exit.");
+    Logger::LogKeyStates(virtualKeyStates);
     return true;
 }
 
@@ -70,17 +72,7 @@ void VirtualKeyboardMonitor::CheckDelayedKeys() {
     for (DWORD vkCode : keysToRelease) {
         keyPressTime.erase(vkCode);
         ForceReleaseKey(vkCode);
-        // 增加一个调试输出, 输出卡住的按键, 只需要输出按键名称, 不用输出按键码, 让输出信息更清晰
-        std::cout << "Delayed key released: ";
-        switch (vkCode) {
-            case VK_LSHIFT: std::cout << "Left Shift"; break;
-            case VK_RSHIFT: std::cout << "Right Shift"; break;
-            case VK_LCONTROL: std::cout << "Left Ctrl"; break;
-            case VK_RCONTROL: std::cout << "Right Ctrl"; break;
-            case VK_LMENU: std::cout << "Left Alt"; break;
-            case VK_RMENU: std::cout << "Right Alt"; break;
-        }
-        std::cout << std::endl;
+        Logger::LogMessage(std::string("Delayed key released: ") + KeyCodeConverter::GetKeyName(vkCode));
     }
 }
 
@@ -104,41 +96,17 @@ LRESULT CALLBACK VirtualKeyboardMonitor::KeyboardProc(int nCode, WPARAM wParam, 
                     instance->keyPressTime.erase(kbStruct->vkCode);
                 }
                 
-                std::cout << "Virtual Key: vkCode=0x" << std::hex << std::setw(2) << std::setfill('0') 
-                          << kbStruct->vkCode << " scanCode=0x" << std::hex << kbStruct->scanCode 
-                          << " flags=0x" << std::hex << kbStruct->flags;
-
+                // 记录特殊按键事件
                 if (kbStruct->vkCode == VK_LSHIFT || kbStruct->vkCode == VK_RSHIFT ||
                     kbStruct->vkCode == VK_LCONTROL || kbStruct->vkCode == VK_RCONTROL ||
                     kbStruct->vkCode == VK_LMENU || kbStruct->vkCode == VK_RMENU) {
-                    
-                    std::cout << " Special virtual key: ";
-                    switch (kbStruct->vkCode) {
-                        case VK_LSHIFT: std::cout << "Left Shift"; break;
-                        case VK_RSHIFT: std::cout << "Right Shift"; break;
-                        case VK_LCONTROL: std::cout << "Left Ctrl"; break;
-                        case VK_RCONTROL: std::cout << "Right Ctrl"; break;
-                        case VK_LMENU: std::cout << "Left Alt"; break;
-                        case VK_RMENU: std::cout << "Right Alt"; break;
-                    }
-                    std::cout << (isKeyDown ? " pressed" : " released");
-                    instance->PrintKeyStates();
+                    Logger::LogKeyEvent(kbStruct->vkCode, kbStruct->scanCode, kbStruct->flags, isKeyDown);
+                    Logger::LogKeyStates(instance->virtualKeyStates);
                 }
             }
         }
     }
     return CallNextHookEx(NULL, nCode, wParam, lParam);
-}
-
-void VirtualKeyboardMonitor::PrintKeyStates() const {
-    std::cout << " [Virtual States: ";
-    std::cout << "LCtrl:" << (virtualKeyStates.leftCtrl ? "1" : "0") << " ";
-    std::cout << "RCtrl:" << (virtualKeyStates.rightCtrl ? "1" : "0") << " ";
-    std::cout << "LShift:" << (virtualKeyStates.leftShift ? "1" : "0") << " ";
-    std::cout << "RShift:" << (virtualKeyStates.rightShift ? "1" : "0") << " ";
-    std::cout << "LAlt:" << (virtualKeyStates.leftAlt ? "1" : "0") << " ";
-    std::cout << "RAlt:" << (virtualKeyStates.rightAlt ? "1" : "0");
-    std::cout << "]" << std::endl;
 }
 
 void VirtualKeyboardMonitor::UpdateKeyState(DWORD vkCode, bool isKeyDown) {
@@ -162,5 +130,5 @@ void VirtualKeyboardMonitor::ForceReleaseKey(DWORD vkCode) {
     input.ki.dwFlags = KEYEVENTF_KEYUP;
     SendInput(1, &input, sizeof(INPUT));
     
-    PrintKeyStates();
+    Logger::LogKeyStates(virtualKeyStates);
 }
