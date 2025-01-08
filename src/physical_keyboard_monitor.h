@@ -29,6 +29,15 @@ public:
     };
 
     const PhysicalKeyStates& GetKeyStates() const { return physicalKeyStates; }
+    
+    // 检查物理按键是否处于按下状态
+    bool IsKeyDown(DWORD vkCode) const;
+    
+    // 扫描码转换为虚拟键码
+    static DWORD ScanCodeToVK(DWORD scanCode);
+    
+    // 虚拟键码转换为扫描码
+    static DWORD VKToScanCode(DWORD vkCode);
 
 private:
     void PrintKeyStates() const;

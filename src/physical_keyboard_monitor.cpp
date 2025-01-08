@@ -92,3 +92,41 @@ void PhysicalKeyboardMonitor::UpdateKeyState(InterceptionKeyStroke& stroke) {
         PrintKeyStates();
     }
 }
+
+bool PhysicalKeyboardMonitor::IsKeyDown(DWORD vkCode) const {
+    switch (vkCode) {
+        case VK_LSHIFT: return physicalKeyStates.leftShift;
+        case VK_RSHIFT: return physicalKeyStates.rightShift;
+        case VK_LCONTROL: return physicalKeyStates.leftCtrl;
+        case VK_RCONTROL: return physicalKeyStates.rightCtrl;
+        case VK_LMENU: return physicalKeyStates.leftAlt;
+        case VK_RMENU: return physicalKeyStates.rightAlt;
+        default: return false;
+    }
+}
+
+DWORD PhysicalKeyboardMonitor::ScanCodeToVK(DWORD scanCode) {
+    // 处理扩展键
+    bool isExtended = (scanCode & 0xE000) == 0xE000;
+    DWORD baseScanCode = scanCode & 0xFF;
+
+    switch (baseScanCode) {
+        case SCANCODE_LSHIFT: return VK_LSHIFT;
+        case SCANCODE_RSHIFT: return VK_RSHIFT;
+        case SCANCODE_LCONTROL: return isExtended ? VK_RCONTROL : VK_LCONTROL;
+        case SCANCODE_LALT: return isExtended ? VK_RMENU : VK_LMENU;
+        default: return 0;
+    }
+}
+
+DWORD PhysicalKeyboardMonitor::VKToScanCode(DWORD vkCode) {
+    switch (vkCode) {
+        case VK_LSHIFT: return SCANCODE_LSHIFT;
+        case VK_RSHIFT: return SCANCODE_RSHIFT;
+        case VK_LCONTROL: return SCANCODE_LCONTROL;
+        case VK_RCONTROL: return SCANCODE_RCONTROL;
+        case VK_LMENU: return SCANCODE_LALT;
+        case VK_RMENU: return SCANCODE_RALT;
+        default: return 0;
+    }
+}

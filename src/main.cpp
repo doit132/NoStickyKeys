@@ -9,6 +9,11 @@ int main() {
     VirtualKeyboardMonitor virtualMonitor;
     PhysicalKeyboardMonitor physicalMonitor;
     
+    // 设置虚拟按键监听器的状态检查回调
+    virtualMonitor.SetKeyStateChecker([&physicalMonitor](DWORD vkCode) {
+        return physicalMonitor.IsKeyDown(vkCode);
+    });
+    
     if (!virtualMonitor.Start() || !physicalMonitor.Start()) {
         return 1;
     }
