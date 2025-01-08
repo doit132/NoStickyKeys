@@ -17,7 +17,11 @@ add_includedirs("include")
 -- 定义目标
 target("NoStickyKeys")
     set_kind("binary")
-    add_files("src/*.cpp")
+    add_ldflags("-mwindows")
+    add_files("src/main.cpp")
+    add_files("src/physical_keyboard_monitor.cpp")
+    add_files("src/virtual_keyboard_monitor.cpp")
+    add_files("src/utils.cpp")
     -- 添加库目录
     add_linkdirs("lib")
     -- 链接DLL
