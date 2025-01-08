@@ -1,18 +1,20 @@
 # NoStickyKey
 
-一个用于防止按键卡住的 Windows 工具，支持物理按键和模拟按键的状态同步。
+>这是我用 windsurf 写的一个小工具，用于防止按键卡住。
+
+我们在使用一些模拟按键软件时, 软件有时不会释放按键, 导致按键卡住。我在使用 AutoHotkey 等模拟按键软件时经常遇到的问题，所以我写了一个小工具来尝试解决这个问题。 #个人编写
+
+这个 README.md 文档也是用 windsurf 自动生成的, 仅供参考
 
 ## 功能特点
 
 - 监控物理按键和虚拟按键状态
 - 自动检测并释放卡住的按键
-- 支持 AutoHotkey 等按键模拟软件
-- 实时显示按键状态
+- 不影响 AutoHotkey, quicker 等模拟按键软件的运行
 
 ## 系统要求
 
 - Windows 操作系统
-- 管理员权限（用于安装键盘钩子）
 - [Interception 驱动](https://github.com/oblitum/Interception)
 
 ## 编译和运行
@@ -25,26 +27,11 @@
    xmake run
    ```
 
-## 项目结构
+## 下载使用
 
-```
-src/
-├── keyboard_common.h    - 通用按键定义和工具
-├── keyboard_logger.h    - 日志输出工具
-├── physical_keyboard_monitor.h/.cpp - 物理键盘监控
-├── virtual_keyboard_monitor.h/.cpp  - 虚拟键盘监控
-└── main.cpp            - 程序入口
-```
-
-## 使用说明
-
-1. 以管理员权限运行程序
-2. 程序会自动监控键盘状态
-3. 当检测到按键卡住时，会自动释放
-4. 使用 Ctrl+C 退出程序
+请到 release 页面下载最新版本
 
 ## 注意事项
 
-- 需要管理员权限
+- 尽量管理员权限启动软件
 - 建议先安装 Interception 驱动
-- 如果使用其他按键模拟软件，建议先测试兼容性
