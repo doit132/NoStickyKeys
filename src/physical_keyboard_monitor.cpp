@@ -1,8 +1,5 @@
 #include "physical_keyboard_monitor.h"
-#include <iostream>
-#include <iomanip>
-#include <thread>
-#include <chrono>
+#include "keyboard_logger.h"
 
 using namespace keyboard;
 
