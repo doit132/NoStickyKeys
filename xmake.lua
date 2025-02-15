@@ -18,7 +18,7 @@ add_includedirs("include")
 target("NoStickyKeys")
     set_kind("binary")
     -- 只要注释掉下方这行, 就可以在运行时出现控制台窗口, 打印调试信息
-    -- add_ldflags("-mwindows")
+    add_ldflags("-mwindows")
     add_files("src/main.cpp")
     add_files("src/physical_keyboard_monitor.cpp")
     add_files("src/virtual_keyboard_monitor.cpp")
